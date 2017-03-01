@@ -18,18 +18,13 @@ class LearningAgent(Agent):
         self.Q = dict()          # Create a Q-table which will be a dictionary of tuples
         self.epsilon = epsilon   # Random exploration factor
         self.alpha = alpha       # Learning factor
-        self.deliberate_action_count = 0
-        self.deliberate_action_found = 0
-
-        ###########
-        ## TO DO ##
-        ###########
         # Set any additional class parameters as needed
+        self.trial = 1
 
 
     def reset(self, destination=None, testing=False):
         """ The reset function is called at the beginning of each trial.
-            'testing' is set to True if testing trials are being used
+           'testing' is set to True if testing trials are being used
             once training trials have completed. """
 
         # Select the destination as the new location to route to
@@ -47,8 +42,13 @@ class LearningAgent(Agent):
             self.alpha = 0
         
         else:
-            self.epsilon -= 0.05
+            #self.epsilon -= 0.05  ##To be used in default learner
+            self.epsilon = -math.pow(-0.03*self.trial,2) + 1
+            self.alpha = -math.pow(-0.02*self.trial,2) + 1
 
+        if self.learning:
+            self.trial += 1
+            
         return None
 
     def build_state(self):
@@ -123,12 +123,10 @@ class LearningAgent(Agent):
                 action = random.choice(self.valid_actions)
             
         else:
-            self.deliberate_action_count += 1
             Q_val = self.get_maxQ(state)
             for a in self.valid_actions:
                 if self.Q[state][a] == Q_val:
                     action = a
-                    self.deliberate_action_found += 1
                     break 
         
             
@@ -167,8 +165,6 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action) # Receive a reward
         self.learn(state, action, reward)   # Q-learn
         
-        print "Deliberate action count: {}".format(self.deliberate_action_count)
-        print "Action found count: {}".format(self.deliberate_action_found)
 
         return
         
@@ -191,7 +187,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent,learning=True)
+    agent = env.create_agent(LearningAgent,learning=True,alpha=1,epsilon=0.9999)
     
     ##############
     # Follow the driving agent
@@ -206,7 +202,7 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env,update_delay=0.1,display=True,log_metrics=True)
+    sim = Simulator(env,update_delay=0.1,display=True,log_metrics=True,optimized=True)
     
     ##############
     # Run the simulator
