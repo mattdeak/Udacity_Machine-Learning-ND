@@ -1,2 +1,2 @@
 # Udacity_Machine-Learning-ND
-Machine Learning NanoDegree Course Material
+Completed Projects for the Machine Learning Nanodegree curriculum at Udacity.
